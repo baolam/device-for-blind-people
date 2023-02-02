@@ -59,7 +59,7 @@ class ControlVer2:
         _print("Quá trình đọc đã hoàn tất")
         self.allow_update = True
 
-        # Gọi thủ tục này để nạp câu đã chạy
+        # Gọi hàm này để nạp câu đã chạy
         self.update_sen(self.current_sens)
 
       if command == START:
