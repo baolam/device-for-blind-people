@@ -1,6 +1,10 @@
 $(document).ready(() => {
   const user = io('/user');
 
+  user.on("notification", (d) => {
+    alert(d);
+  });
+  
   $('#myModal').modal('show');
 
   var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;

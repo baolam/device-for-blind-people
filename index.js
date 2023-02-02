@@ -12,7 +12,7 @@ const io = new socektio.Server(server, {
 });
 
 const PORT = process.env.PORT || 3000;
-const SPATH = `http://${ip.address()}:${PORT}`;
+const SPATH = `${ip.address()}`;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended : false }));
@@ -35,6 +35,9 @@ rasp.on("connection", (_socket) => {
   _socket.on("disconnect", () => {
     console.log("Raspberry pi đã ngắt kết nối");
   });
+  _socket.on("notification", (d) => {
+    user.emit("notification", d);
+  })
 });
 
 user.on("connection", (_socket) => {

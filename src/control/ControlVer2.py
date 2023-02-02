@@ -1,6 +1,7 @@
 import threading
 import os
-import time
+
+from ..utils.print import _print
 from serial import Serial
 
 FORWARD = "TF"
@@ -13,6 +14,8 @@ RESP = "RE"
 START = "ST"
 LOAD_SEN = "LO"
 REQUEST_CONFIG = "RC"
+STOP_UPDATING = "SO";
+ALLOW_UPDATING = "AL";
 
 class ControlVer2:
   FILE = "./static/project.txt"
@@ -30,11 +33,12 @@ class ControlVer2:
     self.ip = None
 
     # Cập nhật câu đã lưu
+    self.allow_update = True
     self.load_sen()
   
   @staticmethod
   def write(arduino, command):
-    print("Lệnh gửi sang arduino {}".format(command))
+    _print("Lệnh gửi sang arduino {}".format(command))
     arduino.write(bytes(command, "utf-8"))
 
   def read(self):
@@ -44,37 +48,52 @@ class ControlVer2:
       
       if command == RESP:
         # Gửi chuỗi câu sang cho thiết bị
-        print("Đang nạp câu mới")
-        self.write(self.arduino, self.current_sens + '#')
+        _print("Đang nạp câu mới")
+        self.write(self.arduino, self.current_sens + ' #')
       
+      if command == STOP_UPDATING:
+        _print("Thiết bị đang hoạt động, không thể nạp câu mới vào thiết bị. Thông báo này có thể có trong quá trình thiết bị hoạt động")
+        self.allow_update = False
+
+      if command == ALLOW_UPDATING:
+        _print("Quá trình đọc đã hoàn tất")
+        self.allow_update = True
+
+        # Gọi thủ tục này để nạp câu đã chạy
+        self.update_sen(self.current_sens)
+
       if command == START:
-        print("Arduino đã sẵn sàng")
+        _print("Arduino đã sẵn sàng")
         self.ard = True
 
       if command == LOAD_SEN:
         if self.current_sens != "":
-          print("Tải câu đã lưu trữ {}".format(self.current_sens))
+          _print("Tải câu đã lưu trữ {}".format(self.current_sens))
           self.update_sen(self.current_sens)
 
       if command == REQUEST_CONFIG:
-        print("Yêu cầu lấy cài đặt")
+        _print("Yêu cầu lấy cài đặt")
         if self.ard and self.ip != None:
           self.write(self.arduino, self.ip + '#')
 
       if command[0] == 'D':
-        print("Phản hồi từ thiết bị {}".format(command[1:]))
+        _print("Phản hồi từ thiết bị {}".format(command[1:]))
 
-    # print("Kết thúc dịch vụ Arduino")
+    # _print("Kết thúc dịch vụ Arduino")
   
   def update_sen(self, sen : str):
     '''
       Gọi phương thức này để cập nhật câu mới
     '''
     self.current_sens = sen.upper()
-    self.write(self.arduino, SENS + '#')
+    
+    if self.allow_update:
+      self.write(self.arduino, SENS + '#')
 
     with open(self.FILE, "w", encoding="utf-8") as f:
       f.write(self.current_sens)
+    
+    return self.allow_update
   
   def sh_config(self, ip):
     '''
@@ -88,5 +107,5 @@ class ControlVer2:
         sen = f.readline().replace("\r\n", "")
         # self.update_sen(sen)
         self.current_sens = sen
-        print("Đọc câu đã lưu trữ: {}".format(sen))
+        _print("Đọc câu đã lưu trữ: {}".format(sen))
       
