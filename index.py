@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import socketio
 import threading
 import subprocess
