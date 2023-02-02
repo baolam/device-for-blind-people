@@ -4,6 +4,7 @@ import socketio
 import threading
 import subprocess
 import requests
+import shlex
 
 from serial import Serial
 from src.control.ControlVer2 import ControlVer2
@@ -16,7 +17,9 @@ client = socketio.Client()
 con = ControlVer2(arduino)
 
 def run_srv():
-  subprocess.run("node .")
+  shell_cmd = "node server.js"
+  cmd = shlex.split(shell_cmd)
+  subprocess.run(cmd)
 
 def csrv_running():
   status = requests.get("http://localhost:3000/test")
