@@ -1,5 +1,10 @@
 $(document).ready(() => {
-  const user = io('/user');
+  let ip = prompt("Nhập địa chỉ server: ");
+
+  while(ip.length == 0)
+    ip = prompt("Nhập địa chỉ server: ");
+  
+    const user = io(`http://${ip}:3000/user`);
 
   user.on("notification", (d) => {
     alert(d);
