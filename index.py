@@ -12,12 +12,13 @@ from src.utils.accent import remove_accents
 from src.utils.print import _print
 
 NAMESPACE = "/rasp"
-arduino = Serial("COM6")
+# arduino = Serial("COM3")
+arduino = Serial()
 client = socketio.Client()
 con = ControlVer2(arduino)
 
 def run_srv():
-  shell_cmd = "node server.js"
+  shell_cmd = "node index.js"
   cmd = shlex.split(shell_cmd)
   subprocess.run(cmd)
 
